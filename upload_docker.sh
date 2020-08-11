@@ -6,7 +6,7 @@ set -e
 
 # Step 1:
 # Create dockerpath
-local_name=flask_prediction
+local_name=flask-prediction
 docker_user=decisa
 dockerpath=$docker_user/$local_name
 

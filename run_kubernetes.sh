@@ -1,17 +1,23 @@
 #!/usr/bin/env bash
+# exit script on errors:
+set -e
 
 # This tags and uploads an image to Docker Hub
 
 # Step 1:
 # This is your Docker ID/path
-# dockerpath=<>
+local_name=flask-prediction
+docker_user=decisa
+dockerpath=$docker_user/$local_name
 
 # Step 2
 # Run the Docker Hub container with kubernetes
 
+kubectl create deployment $local_name --image=$dockerpath:latest
 
 # Step 3:
 # List kubernetes pods
+kubectl get pods
 
 # Step 4:
 # Forward the container port to a host
