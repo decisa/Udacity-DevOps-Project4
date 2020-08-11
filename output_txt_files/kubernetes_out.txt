@@ -1,1 +1,48 @@
-<paste log output from Kubernetes-mediated prediction, here>
+(.devops) ➜  project4 git:(master) ✗ kubectl expose deployment flask-prediction --type=LoadBalancer --port=8000 --target-port=80
+service/flask-prediction exposed
+(.devops) ➜  project4 git:(master) ✗ kubectl service minikube --url
+Error: unknown command "service" for "kubectl"
+Run 'kubectl --help' for usage.
+(.devops) ➜  project4 git:(master) ✗ minikube service flask-prediction --url
+🏃  Starting tunnel for service flask-prediction.
+|-----------|------------------|-------------|------------------------|
+| NAMESPACE |       NAME       | TARGET PORT |          URL           |
+|-----------|------------------|-------------|------------------------|
+| default   | flask-prediction |             | http://127.0.0.1:49611 |
+|-----------|------------------|-------------|------------------------|
+http://127.0.0.1:49611
+❗  Because you are using a Docker driver on darwin, the terminal needs to be open to run it.
+
+
+(.devops) ➜  project4 git:(master) ✗ ./make_prediction_minikube.sh
+Port: 49611
+{
+  "prediction": [
+    20.35373177134412
+  ]
+}
+(.devops) ➜  project4 git:(master) ✗ kubectl get pods
+NAME                                READY   STATUS    RESTARTS   AGE
+flask-prediction-7d95689989-599jm   1/1     Running   0          23m
+(.devops) ➜  project4 git:(master) ✗ kubectl logs flask-prediction-7d95689989-599jm
+ * Serving Flask app "app" (lazy loading)
+ * Environment: production
+   WARNING: Do not use the development server in a production environment.
+   Use a production WSGI server instead.
+ * Debug mode: on
+ * Running on http://0.0.0.0:80/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 692-599-718
+172.17.0.2 - - [11/Aug/2020 04:49:43] "GET / HTTP/1.1" 200 -
+172.17.0.2 - - [11/Aug/2020 04:49:43] "GET /favicon.ico HTTP/1.1" 404 -
+[2020-08-11 04:51:14,858] INFO in app: JSON payload:
+{'CHAS': {'0': 0}, 'RM': {'0': 6.575}, 'TAX': {'0': 296.0}, 'PTRATIO': {'0': 15.3}, 'B': {'0': 396.9}, 'LSTAT': {'0': 4.98}}
+[2020-08-11 04:51:14,874] INFO in app: Inference payload DataFrame:
+   CHAS     RM    TAX  PTRATIO      B  LSTAT
+0     0  6.575  296.0     15.3  396.9   4.98
+[2020-08-11 04:51:14,888] INFO in app: Scaling Payload:
+   CHAS     RM    TAX  PTRATIO      B  LSTAT
+0     0  6.575  296.0     15.3  396.9   4.98
+[2020-08-11 04:51:14,895] INFO in app: Prediction output: [20.35373177134412]
+172.17.0.2 - - [11/Aug/2020 04:51:14] "POST /predict HTTP/1.1" 200 -
