@@ -1,4 +1,7 @@
-<include a CircleCI status badge, here>
+[![decisa](https://circleci.com/gh/decisa/Udacity-DevOps-Project4.svg?style=svg)](https://app.circleci.com/pipelines/github/decisa/Udacity-DevOps-Project4)
+
+# DevOps Engineer Nanodegree Project 4
+- by Artem Telesh
 
 ## Project Overview
 
