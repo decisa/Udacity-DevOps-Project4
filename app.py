@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask.logging import create_logger
 import logging
 
@@ -21,8 +21,8 @@ def scale(payload):
 @app.route("/")
 def home():
     # html = f"<h3>Sklearn Prediction Home</h3>"
-    html = "<h3>Sklearn Prediction Home</h3>"
-    return html.format(format)
+    
+    return render_template('index.html')
 
 @app.route("/predict", methods=['POST'])
 def predict():
