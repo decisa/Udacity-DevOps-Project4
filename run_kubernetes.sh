@@ -21,4 +21,6 @@ kubectl get pods
 
 # Step 4:
 # Forward the container port to a host
+kubectl expose deployment flask-prediction --type=LoadBalancer --port=8000 --target-port=80
+kubectl get services
 
