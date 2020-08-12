@@ -3,6 +3,52 @@
 # DevOps Engineer Nanodegree Project 4
 - by Artem Telesh
 
+In this project I learned how to successfully containerize and depoloy an application.
+I containerized a pre-trained `sklearn` model that has been trained to predict housing prices in Boston based on serveral aspects, like average rooms in home, highway access, teacher to pupil ratios and so on.
+
+## How to run the app
+### locally 
+- clone the repo
+- run `make setup` to create virtual Python environment
+- run `source ~/.devops/bin/activate` to activate virtual environment
+- run `make install` to install all dependencies for the project
+- run `python app.py` to start the app
+- in a separate terminal window run `./make_prediction_local.sh` to send input data to the app. local script will send input data to port 80.
+- enjoy the results
+
+### docker
+- install `docker`
+- clone the repo
+- run `./run_docker.sh` to build new docker image and run it in a new container
+- in a separate terminal window run `./make_prediction.sh` to send input data to the app. this script will send input data to port 8000, which will be forwarded to port 80 inside docker image.
+- enjoy the results
+
+### kubernetes
+- make sure that `kubectl` and `minikube` are installed
+- once docker image is created (in docker section), upload it to docker hub: `./upload_docker.sh`. change dockerhub username inside script if needed. 
+- once the image is uploaded, run `./run_kubernetes.sh`. this should create a depoloyment, start the pod, and expose the deployment port via load balancer
+- since we deployed on a local machine, we do not have an external IP to test the app. we can use minikube to do the testing. run `minikube service flask-prediction --url`. this will start a tunnel. please note which port is being used (for example http://127.0.0.1:60248  uses port 60248)
+- in a separate terminal window run `./make_prediction_minikube.sh PORT_NUMBER`, where PORT_NUMBER is port number from previous step.
+- enjoy the results.
+
+
+
+## Files  in the prject
+- `Dockerfile` - docker configuration file
+- `Makefile` - contains commands to make the build and lint process easier
+- `app.py` - API for our machine learning app
+- `requirements.txt` - list of all dependencies for the project
+
+### shell scripts
+- `run_docker.sh` - bash script to build new docker image and run it in a new container
+- `upload_docker.sh` - bash script to push image to docker hub
+- `run_kubernetes.sh` - bash script to create a deployment, start the pod and expose deployments port
+- `make_prediction_local.sh` - bash script to send input data to the app when running the app locally from terminal
+- `make_prediction.sh` - bash script to send input data to the app when launched with docker
+- `make_prediction_minikube.sh` - bash script to send input data to the app when launched with kubernetes
+A short explanation of the files in the repository.
+
+
 ## Project Overview
 
 In this project, you will apply the skills you have acquired in this course to operationalize a Machine Learning Microservice API. 
