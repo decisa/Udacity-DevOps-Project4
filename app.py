@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect, make_response, url_for
 from flask.logging import create_logger
 import logging
 import json
@@ -22,10 +22,25 @@ def scale(payload):
 @app.route("/")
 def home():
     # html = f"<h3>Sklearn Prediction Home</h3>"
+    data = {
+        "CHAS" : {
+            "0": 55 
+        },"RM" : {
+            "0": 55 
+        },"TAX" : {
+            "0": 55 
+        },"PTRATIO" : {
+            "0": 55 
+        },"B" : {
+            "0": 55 
+        },"LSTAT" : {
+            "0": 55 
+        }
+    }
     
     return render_template('index.html')
 
-@app.route("/predict", methods=['POST'])
+@app.route("/predict", methods=['POST', 'GET'])
 def predict():
     """Performs an sklearn prediction
         
@@ -54,40 +69,44 @@ def predict():
         { "prediction": [ <val> ] }
         
         """
-    json_payload = {
-        "CHAS": {
-            "0": request.form['chas']
-        },
-        "RM": {
-            "0": request.form['rm']
-        },
-        "TAX": {
-            "0": request.form['tax']
-        },
-        "PTRATIO": {
-            "0": request.form['ptratio']
-        },
-        "B": {
-            "0": request.form['b']
-        },
-        "LSTAT": {
-            "0": request.form['lstat']
+    if request.method == 'POST':
+        json_payload = {
+            "CHAS": {
+                "0": request.form['chas']
+            },
+            "RM": {
+                "0": request.form['rm']
+            },
+            "TAX": {
+                "0": request.form['tax']
+            },
+            "PTRATIO": {
+                "0": request.form['ptratio']
+            },
+            "B": {
+                "0": request.form['b']
+            },
+            "LSTAT": {
+                "0": request.form['lstat']
+            }
         }
-    }
-    # Logging the input payload
+        # Logging the input payload
 
-    # json_payload = request.json
-    # return json.dumps(payload) or "shit"
-    LOG.info(f"JSON payload: \n{json.dumps(json_payload)}")
-    inference_payload = pd.DataFrame(json_payload)
-    LOG.info(f"Inference payload DataFrame: \n{inference_payload}")
-    # scale the input
-    scaled_payload = scale(inference_payload)
-    # get an output prediction from the pretrained model, clf
-    prediction = list(clf.predict(scaled_payload))
-    # TO DO:  Log the output prediction value
-    LOG.info(f"Prediction output: {prediction}")
-    return jsonify({'prediction': prediction})
+        # json_payload = request.json
+        # return json.dumps(payload) or "shit"
+        LOG.info(f"JSON payload: \n{json.dumps(json_payload)}")
+        inference_payload = pd.DataFrame(json_payload)
+        LOG.info(f"Inference payload DataFrame: \n{inference_payload}")
+        # scale the input
+        scaled_payload = scale(inference_payload)
+        # get an output prediction from the pretrained model, clf
+        prediction = list(clf.predict(scaled_payload))
+        # TO DO:  Log the output prediction value
+        LOG.info(f"Prediction output: {prediction}")
+        # return jsonify({'prediction': prediction})
+        return render_template('index.html', form_values = json_payload)
+    # if GET request
+    return redirect('/')
 
 if __name__ == "__main__":
     # load pretrained model as clf

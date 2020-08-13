@@ -15,7 +15,7 @@
             </span>
         </label>
         <div class="col-sm-10">
-            <input type="number" class="form-control" id="chas" name="chas" value="0" step="0.1">
+            <input type="number" class="form-control" id="chas" name="chas" value="{{ form_values and form_values['CHAS']['0'] or 0 }}" step="0.1">
         </div>
     </div>
     <div class="form-group row  align-items-center">
@@ -25,7 +25,7 @@
             </span>
         </label>
         <div class="col-sm-10">
-            <input type="number" class="form-control" id="rm" name="rm" value="6.575" step="0.001">
+            <input type="number" class="form-control" id="rm" name="rm" value="{{ form_values and form_values['RM']['0'] or 6.575 }}"  step="0.001">
         </div>
     </div>
     <div class="form-group row  align-items-center">
@@ -35,7 +35,7 @@
             </span>
         </label>
         <div class="col-sm-10">
-            <input type="number" class="form-control" id="tax" name="tax" value="296" step="0.1">
+            <input type="number" class="form-control" id="tax" name="tax" value="{{ form_values and form_values['TAX']['0'] or 296 }}" step="0.1">
         </div>
     </div>
     <div class="form-group row  align-items-center">
@@ -45,14 +45,14 @@
             </span>
         </label>
         <div class="col-sm-10">
-            <input type="number" class="form-control" id="ptratio" name="ptratio" value="15.3" step="0.1">
+            <input type="number" class="form-control" id="ptratio" name="ptratio" value="{{ form_values and form_values['PTRATIO']['0'] or 15.3 }}" step="0.1">
         </div>
     </div>
     <div class="form-group row  align-items-center">
         <label for="b" class="col-sm-2 col-form-label">B
         </label>
         <div class="col-sm-10">
-            <input type="number" class="form-control" id="b" name="b" value="396.9" step="0.1">
+            <input type="number" class="form-control" id="b" name="b" value="{{ form_values and form_values['B']['0'] or 396.9 }}" step="0.1">
         </div>
     </div>
     <div class="form-group row  align-items-center">
@@ -62,7 +62,7 @@
             </span>
         </label>
         <div class="col-sm-10">
-            <input type="number" class="form-control" id="lstat" name="lstat" value="4.98" step="0.01">
+            <input type="number" class="form-control" id="lstat" name="lstat" value="{{ form_values and form_values['LSTAT']['0'] or 4.98 }}" step="0.01">
         </div>
     </div>
 
