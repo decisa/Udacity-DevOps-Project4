@@ -104,7 +104,7 @@ def predict():
         # TO DO:  Log the output prediction value
         LOG.info(f"Prediction output: {prediction}")
         # return jsonify({'prediction': prediction})
-        return render_template('index.html', form_values = json_payload)
+        return render_template('index.html', form_values = json_payload, prediction = prediction)
     # if GET request
     return redirect('/')
 
