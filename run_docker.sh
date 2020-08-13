@@ -16,5 +16,16 @@ docker image ls
 
 # Step 3: 
 # Run flask app
-# docker run --name=flask_container -p 80:80 flask_prediction
+echo 
+echo 
+echo "! ! Important ! !"
+echo
+echo "* -------------------------------------------------------------------- *"
+echo "|                                                                      |"
+echo "|  docker is exposed on port 8000. please check front end version at:  |"
+echo "|  http://localhost:8000                                               |"
+echo "|                                                                      |"
+echo "* -------------------------------------------------------------------- *"
+echo
+echo
 docker run -p 8000:80 $local_name
