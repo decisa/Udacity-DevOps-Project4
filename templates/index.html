@@ -1,0 +1,80 @@
+{% extends 'main.html' %}
+
+{% block head %}
+<title>Sklearn Prediction Home</title>
+{% endblock %}
+
+{% block body %}
+<h1>Udacity DevOps Engineer Project 4: Sklearn Prediction</h1>
+<p>by Art Telesh</p>
+<form action="/predict" method="POST">
+    <div class="form-group row align-items-center">
+        <label for="chas" class="col-sm-2 col-form-label">Charles River variable
+            <br><span style="font-size:12px; color:#777">
+                set to 1 if tract bounds river; 0 otherwise
+            </span>
+        </label>
+        <div class="col-sm-10">
+            <input type="number" class="form-control" id="chas" name="chas" value="0" step="0.1">
+        </div>
+    </div>
+    <div class="form-group row  align-items-center">
+        <label for="rm" class="col-sm-2 col-form-label">Rooms average
+            <br><span style="font-size:12px; color:#777">
+                average number of rooms per dwelling
+            </span>
+        </label>
+        <div class="col-sm-10">
+            <input type="number" class="form-control" id="rm" name="rm" value="6.575" step="0.001">
+        </div>
+    </div>
+    <div class="form-group row  align-items-center">
+        <label for="tax" class="col-sm-2 col-form-label">Tax
+            <br><span style="font-size:12px; color:#777">
+                full-value property-tax rate per $10,000
+            </span>
+        </label>
+        <div class="col-sm-10">
+            <input type="number" class="form-control" id="tax" name="tax" value="296" step="0.1">
+        </div>
+    </div>
+    <div class="form-group row  align-items-center">
+        <label for="ptratio" class="col-sm-2 col-form-label">Pupil/teacher ratio
+            <br><span style="font-size:12px; color:#777">
+                pupil-teacher ratio by town
+            </span>
+        </label>
+        <div class="col-sm-10">
+            <input type="number" class="form-control" id="ptratio" name="ptratio" value="15.3" step="0.1">
+        </div>
+    </div>
+    <div class="form-group row  align-items-center">
+        <label for="b" class="col-sm-2 col-form-label">B
+        </label>
+        <div class="col-sm-10">
+            <input type="number" class="form-control" id="b" name="b" value="396.9" step="0.1">
+        </div>
+    </div>
+    <div class="form-group row  align-items-center">
+        <label for="lstat" class="col-sm-2 col-form-label">Lower status
+            <br><span style="font-size:12px; color:#777">
+                lower status of the population (percent)
+            </span>
+        </label>
+        <div class="col-sm-10">
+            <input type="number" class="form-control" id="lstat" name="lstat" value="4.98" step="0.01">
+        </div>
+    </div>
+
+    <input type="submit" value="predict">
+</form>
+
+
+<!-- "CHAS":0
+ "RM": 6.575
+ "TAX": 296.0
+ "PTRATIO": 15.3
+ "B": 396.9
+ "LSTAT":4.98 -->
+
+{% endblock %}

@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 from flask.logging import create_logger
 import logging
+import json
 
 import pandas as pd
 from sklearn.externals import joblib
@@ -53,10 +54,31 @@ def predict():
         { "prediction": [ <val> ] }
         
         """
-    
+    json_payload = {
+        "CHAS": {
+            "0": request.form['chas']
+        },
+        "RM": {
+            "0": request.form['rm']
+        },
+        "TAX": {
+            "0": request.form['tax']
+        },
+        "PTRATIO": {
+            "0": request.form['ptratio']
+        },
+        "B": {
+            "0": request.form['b']
+        },
+        "LSTAT": {
+            "0": request.form['lstat']
+        }
+    }
     # Logging the input payload
-    json_payload = request.json
-    LOG.info(f"JSON payload: \n{json_payload}")
+
+    # json_payload = request.json
+    # return json.dumps(payload) or "shit"
+    LOG.info(f"JSON payload: \n{json.dumps(json_payload)}")
     inference_payload = pd.DataFrame(json_payload)
     LOG.info(f"Inference payload DataFrame: \n{inference_payload}")
     # scale the input
