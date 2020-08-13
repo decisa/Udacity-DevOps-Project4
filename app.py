@@ -20,24 +20,7 @@ def scale(payload):
     return scaled_adhoc_predict
 
 @app.route("/")
-def home():
-    # html = f"<h3>Sklearn Prediction Home</h3>"
-    data = {
-        "CHAS" : {
-            "0": 55 
-        },"RM" : {
-            "0": 55 
-        },"TAX" : {
-            "0": 55 
-        },"PTRATIO" : {
-            "0": 55 
-        },"B" : {
-            "0": 55 
-        },"LSTAT" : {
-            "0": 55 
-        }
-    }
-    
+def home():    
     return render_template('index.html')
 
 @app.route("/predict", methods=['POST', 'GET'])
@@ -70,6 +53,7 @@ def predict():
         
         """
     if request.method == 'POST':
+        # collect inputs from form:
         json_payload = {
             "CHAS": {
                 "0": request.form['chas']
@@ -90,10 +74,9 @@ def predict():
                 "0": request.form['lstat']
             }
         }
-        # Logging the input payload
 
+        # Logging the input payload
         # json_payload = request.json
-        # return json.dumps(payload) or "shit"
         LOG.info(f"JSON payload: \n{json.dumps(json_payload)}")
         inference_payload = pd.DataFrame(json_payload)
         LOG.info(f"Inference payload DataFrame: \n{inference_payload}")
