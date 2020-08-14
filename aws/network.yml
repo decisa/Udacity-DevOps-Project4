@@ -1,0 +1,107 @@
+Description: >
+    Artem Telesh / Cloud DevOps Engineer Nanodegree
+    Project 4.
+Parameters:
+    EnvironmentName: 
+        Description: Name of environment to prefix to resource names
+        Type: String
+    VpcCIDR:
+        Description: IP range for this VPC
+        Type: String
+        Default: 10.0.0.0/16
+    PubSubnet1CIDR:
+        Description: IP range for public subnet in Availability Zone 1
+        Type: String
+        Default: 10.0.0.0/24
+
+Resources:
+    VPC:
+        Type: AWS::EC2::VPC
+        Properties:
+            CidrBlock: !Ref VpcCIDR
+            EnableDnsHostnames: true
+            Tags: 
+                - Key: Name 
+                  Value: !Ref EnvironmentName
+
+    InternetGateway:
+        Type: AWS::EC2::InternetGateway
+        Properties:
+            Tags:
+                - Key: Name
+                  Value: !Ref EnvironmentName
+
+    InternetGatewayAttachment:
+        Type: AWS::EC2::VPCGatewayAttachment
+        Properties:
+            InternetGatewayId: !Ref InternetGateway
+            VpcId: !Ref VPC
+
+    PublicSubnet1:
+        # public subnet in AZ1
+        Type: AWS::EC2::Subnet
+        Properties:
+            AvailabilityZone: !Select [ 0, !GetAZs '' ]
+            CidrBlock: !Ref PubSubnet1CIDR
+            MapPublicIpOnLaunch: true
+            VpcId: !Ref VPC
+            Tags:
+                - Key: Name
+                  Value: !Sub ${EnvironmentName} Pub Subnet in AZ1
+
+    # TODO:
+    # create route table
+    # create route (rule) to send all traffic to internet gateway and assign to route table
+    # associate route table with pub subnet 1 and pub subnet 2
+
+    PublicRouteTable:
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: !Ref VPC
+            Tags:
+                - Key: Name
+                  Value: !Sub ${EnvironmentName} Public Route Table
+
+    DefaultPublicRoute:
+        Type: AWS::EC2::Route
+        DependsOn: InternetGatewayAttachment
+        Properties:
+            GatewayId: !Ref InternetGateway
+            DestinationCidrBlock: 0.0.0.0/0
+            RouteTableId: !Ref PublicRouteTable
+    
+    PublicSubnet1RouteAssociation:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId: !Ref PublicSubnet1
+            RouteTableId: !Ref PublicRouteTable
+
+
+Outputs:
+    VPC:
+        Description: VPC id
+        Value: !Ref VPC
+        Export:
+            Name: !Sub ${EnvironmentName}-VpcId
+    
+    PublicSubnet1:
+        Description: Public Subnet 1 ref in AZ1
+        Value: !Ref PublicSubnet1
+        Export:
+            Name: !Sub ${EnvironmentName}-PubSNet1
+
+    PublicRouteTable:
+        Description: Ref to Route Table of public subnets
+        Value: !Ref PublicRouteTable
+        Export:
+            Name: !Sub ${EnvironmentName}-PubRT
+
+  
+            # #!/bin/bash
+            # apt-get update -y
+            # apt-get install unzip awscli -y
+            # apt-get install apache2 -y
+            # systemctl start apache2.service
+            # cd /var/www/html
+            # aws s3 cp s3://udacity-demo-1/udacity.zip .
+            # unzip -o udacity.zip

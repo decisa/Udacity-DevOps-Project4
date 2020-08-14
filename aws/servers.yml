@@ -1,0 +1,124 @@
+Description: >
+    Artem Telesh / Cloud DevOps Engineer Nanodegree
+    Project 2.
+Parameters:
+    # whatever you consider a changing value, put it as a parameter instead of hard-coding it into your script
+    EnvironmentName:
+        Description: Name of environment to prefix to resource names
+        Type: String
+    
+    HostInstanceType:
+        Description: Instance type for Host EC2
+        Type: String
+        Default: t2.micro
+
+    HostKeyName:
+        Description: Key name to login into host EC2
+        Type: String
+        
+Resources:
+    HostSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: Allow HTTP and SSH traffic to Servers
+            SecurityGroupIngress:
+              - IpProtocol: tcp  # allow inbound HTTP traffic
+                FromPort: 80
+                ToPort: 80
+                CidrIp: 0.0.0.0/0
+              - IpProtocol: tcp  # allow inbound SSH traffic
+                FromPort: 22
+                ToPort: 22
+                CidrIp: 173.49.58.93/32 # shoudl I limit to only my IP?
+            SecurityGroupEgress:
+              - IpProtocol: tcp
+                FromPort: 0
+                ToPort: 65535
+                CidrIp: 0.0.0.0/0
+            VpcId: 
+                Fn::ImportValue:
+                    !Sub ${EnvironmentName}-VpcId
+            Tags:
+                - Key: Name
+                  Value: !Sub ${EnvironmentName} Host instance Security Group
+
+    K8sAccessRole:
+        Type: AWS::IAM::Role
+        Properties: 
+            Description: Role to allow read access to S3 buckets
+            AssumeRolePolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                  - Effect: Allow
+                    Principal:
+                        Service:
+                            - ec2.amazonaws.com
+                    Action:
+                        - 'sts:AssumeRole'
+            Path: /
+            Policies:
+              - PolicyName: AmazonS3ReadOnlyAccess
+                PolicyDocument:
+                    Version: 2012-10-17
+                    Statement:
+                      - Effect: Allow
+                        Action:
+                            - s3:Get*
+                            - s3:List*
+                        Resource: '*'
+            RoleName: EC2-K8s-Role-Route53-EC2-IAM-S3
+            Tags: 
+              - Key: Name
+                Value: !Sub ${EnvironmentName}-EC2-K8s-Role-Route53-EC2-IAM-S3 Role
+    
+    K8sProfile:
+        Type: AWS::IAM::InstanceProfile
+        Properties: 
+            InstanceProfileName: !Sub ${EnvironmentName}-Kubernetes-Profile
+            Roles: 
+                - !Ref K8sAccessRole
+
+    HostEC2:
+        Type: AWS::EC2::Instance
+        Properties: 
+            # AvailabilityZone: us-west-2
+            # BlockDeviceMappings: 
+                # - BlockDeviceMapping
+            # CpuOptions: 
+            #     CpuOptions
+            IamInstanceProfile: !Ref K8sProfile
+            ImageId: ami-0a634ae95e11c6f91
+            InstanceType: !Ref HostInstanceType
+            KeyName: !Ref HostKeyName
+            # NetworkInterfaces: 
+                # - NetworkInterface
+            SecurityGroupIds: 
+                - !Ref HostSecurityGroup
+            # SecurityGroups: 
+            #     - !Ref HostSecurityGroup
+            SubnetId: 
+                Fn::ImportValue:
+                    !Sub ${EnvironmentName}-PubSNet1
+            Tags: 
+                - Key: Name
+                  Value: !Sub ${EnvironmentName} Host EC2 Instance
+            UserData:
+                Fn::Base64: !Sub |
+                    #!/bin/bash
+                    apt-get update -y
+                        
+                    echo "Hi from Cloud formation" > ~/artem_telesh.txt
+
+                    # install awscli
+                    curl https://s3.amazonaws.com/aws-cli/awscli-bundle.zip -o awscli-bundle.zip
+                    apt install unzip python -y
+                    unzip awscli-bundle.zip
+                    ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
+
+                    # install kubectl
+                    curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+                    chmod +x ./kubectl
+                    mv ./kubectl /usr/local/bin/kubectl
+            # Volumes: 
+            #     - Volume
+
