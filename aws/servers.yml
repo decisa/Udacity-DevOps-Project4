@@ -114,6 +114,24 @@ Resources:
                                   - spot.amazonaws.com
                                   - spotfleet.amazonaws.com
                                   - transitgateway.amazonaws.com
+              - PolicyName: AmazonIAMFullAccess
+                PolicyDocument: 
+                    Version: 2012-10-17
+                    Statement:
+                      - Action: 
+                          - iam:*
+                          - organizations:DescribeAccount
+                          - organizations:DescribeOrganization
+                          - organizations:DescribeOrganizationalUnit
+                          - organizations:DescribePolicy
+                          - organizations:ListChildren
+                          - organizations:ListParents
+                          - organizations:ListPoliciesForTarget
+                          - organizations:ListRoots
+                          - organizations:ListPolicies
+                          - organizations:ListTargetsForPolicy
+                        Effect: Allow
+                        Resource: '*'
             Tags: 
               - Key: Name
                 Value: !Sub ${EnvironmentName}-EC2-K8s-Role-Route53-EC2-IAM-S3 Role
