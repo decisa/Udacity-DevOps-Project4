@@ -91,6 +91,29 @@ Resources:
                       - Effect: Allow
                         Action: apigateway:GET
                         Resource: arn:aws:apigateway:*::/domainnames
+              - PolicyName: AmazonEC2FullAccess
+                PolicyDocument:
+                    Version: 2012-10-17
+                    Statement:
+                      - Action: 
+                          - ec2:*
+                          - elasticloadbalancing:*
+                          - cloudwatch:*
+                          - autoscaling:*
+                        Effect: Allow
+                        Resource: '*'
+                      - Action: iam:CreateServiceLinkedRole
+                        Effect: Allow
+                        Resource: '*'
+                        Condition:
+                            StringEquals:
+                                'iam:AWSServiceName':
+                                  - autoscaling.amazonaws.com
+                                  - ec2scheduled.amazonaws.com
+                                  - elasticloadbalancing.amazonaws.com
+                                  - spot.amazonaws.com
+                                  - spotfleet.amazonaws.com
+                                  - transitgateway.amazonaws.com
             Tags: 
               - Key: Name
                 Value: !Sub ${EnvironmentName}-EC2-K8s-Role-Route53-EC2-IAM-S3 Role
