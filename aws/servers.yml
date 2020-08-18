@@ -46,6 +46,7 @@ Resources:
         Type: AWS::IAM::Role
         Properties: 
             Description: Role to allow read access to S3 buckets
+            RoleName: EC2-K8s-Role-Route53-EC2-IAM-S3
             AssumeRolePolicyDocument:
                 Version: 2012-10-17
                 Statement:
@@ -57,16 +58,15 @@ Resources:
                         - 'sts:AssumeRole'
             Path: /
             Policies:
-              - PolicyName: AmazonS3ReadOnlyAccess
+              - PolicyName: AmazonS3FullAccess
                 PolicyDocument:
                     Version: 2012-10-17
                     Statement:
                       - Effect: Allow
                         Action:
-                            - s3:Get*
-                            - s3:List*
+                            - s3:*
                         Resource: '*'
-            RoleName: EC2-K8s-Role-Route53-EC2-IAM-S3
+              
             Tags: 
               - Key: Name
                 Value: !Sub ${EnvironmentName}-EC2-K8s-Role-Route53-EC2-IAM-S3 Role
