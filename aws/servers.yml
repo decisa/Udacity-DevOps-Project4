@@ -1,6 +1,6 @@
 Description: >
     Artem Telesh / Cloud DevOps Engineer Nanodegree
-    Project 2.
+    Project 4: Servers
 Parameters:
     # whatever you consider a changing value, put it as a parameter instead of hard-coding it into your script
     EnvironmentName:
@@ -15,6 +15,11 @@ Parameters:
     HostKeyName:
         Description: Key name to login into host EC2
         Type: String
+
+    ConfigStorageName:
+        Description: Name of S3 bucket, where KOPS cluster config will be stored
+        Type: String
+        Default: devops.k8s.telesh.us
         
 Resources:
     HostSecurityGroup:
@@ -143,6 +148,13 @@ Resources:
             Roles: 
                 - !Ref K8sAccessRole
 
+    ConfigStorage:
+        Type: AWS::S3::Bucket
+        DeletionPolicy: Delete
+        Properties:
+            BucketName: !Ref ConfigStorageName
+
+
     HostEC2:
         Type: AWS::EC2::Instance
         Properties: 
@@ -168,22 +180,119 @@ Resources:
                 - Key: Name
                   Value: !Sub ${EnvironmentName} Host EC2 Instance
             UserData:
-                Fn::Base64: !Sub |
+                Fn::Base64: !Sub 
+                  - |
                     #!/bin/bash
                     apt-get update -y
+
+                    open_port=80
                         
                     echo "Hi from Cloud formation" > ~/artem_telesh.txt
 
                     # install awscli
                     curl https://s3.amazonaws.com/aws-cli/awscli-bundle.zip -o awscli-bundle.zip
-                    apt install unzip python -y
+                    apt install unzip python make -y
                     unzip awscli-bundle.zip
                     ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
 
                     # install kubectl
-                    curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+                    echo "installing kubectl"
+                    curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl  https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
                     chmod +x ./kubectl
                     mv ./kubectl /usr/local/bin/kubectl
-            # Volumes: 
-            #     - Volume
+
+                    echo "done installing kubectl"
+
+                    # install KOPS 
+                    curl -LO https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
+                    chmod +x kops-linux-amd64
+                    mv kops-linux-amd64 /usr/local/bin/kops
+
+
+                    # generate ssh key 
+                    ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa <<< y
+
+                    # set location of config files
+                    mkdir -p ~/.kops
+                    mkdir -p /home/ubuntu/.kops
+                    echo "kops_state_store: s3://${ConfigStorageName}" >> ~/.kops/config
+                    echo "kops_state_store: s3://${ConfigStorageName}" >> /home/ubuntu/.kops/config
+
+                    # add Makefile to easily get ELB DNSname and to destroy cluster 
+                    echo "dnsname:"  > /home/ubuntu/Makefile
+                    printf "\t@echo \"Loadbalancer URL:  http://\$(shell aws elb describe-load-balancers --region us-west-2 --query LoadBalancerDescriptions[*].DNSName | tr -d '[\"\"]\\" >> /home/ubuntu/Makefile
+                    printf "n '):$open_port\"\n\n" >> /home/ubuntu/Makefile
+
+                    echo "# Delete k8s cluster:" >> /home/ubuntu/Makefile
+                    echo "destroy: check_destroy"  >> /home/ubuntu/Makefile
+                    printf "\tkops delete cluster --name ${ConfigStorageName} --yes\n\n" >> /home/ubuntu/Makefile
+
+                    printf "check_destroy:\n\t@echo -n \"Are you sure you want to delete the cluster? [y/n] \" && read ans && [ \$\${!ans:-N} = y ]\n\n.PHONY: destroy check_destroy\n\n" >> /home/ubuntu/Makefile
+
+                    
+
+                    export KOPS_STATE_STORE=s3://${ConfigStorageName}
+
+                    REGIONS=${AZs} 
+                    VPC=${VPC}
+                    SUBNETS=${SNets} 
+
+                    echo "searching for cluster..."
+                    if kops get clusters | grep ${ConfigStorageName}
+                    then
+                        echo "Cluster already exists in S3." 
+                        # echo "Cluster already exists in S3. Deleting first"
+                        # kops delete cluster --name ${ConfigStorageName} --yes
+                    else
+                        echo "This is a clean installation. Starting from scratch"
+                        kops create cluster --cloud=aws --zones=$REGIONS --name=${ConfigStorageName} \
+                            --state=s3://${ConfigStorageName} \
+                            --dns-zone=telesh.us --dns=private \
+                            --master-size=t2.micro --node-size=t2.micro --node-count=1 \
+                            --vpc=$VPC --subnets=$SUBNETS 
+                    fi
+                    
+                    
+                    echo "************************************************************"
+                    if kops get secrets --name devops.k8s.telesh.us | grep SSHPublicKey
+                    then 
+                        echo "SSHPublicKey secret already exists!"
+                    else
+                        echo "SSHPublicKey secret does not exist!"
+                        echo "adding new one"
+                        kops create secret --name=${ConfigStorageName} sshpublickey admin -i ~/.ssh/id_rsa.pub
+                    fi
+                    echo "************************************************************"
+                        
+                    kops update cluster --name=${ConfigStorageName}
+                    kops update cluster --name=${ConfigStorageName} --yes
+
+                    echo "--------------------------------------------------------------------------------"
+                    echo "get clusters after update: "
+                    kops get clusters
+                    echo "--------------------------------------------------------------------------------"
+
+                    echo "kops update cluster --name=${ConfigStorageName} --yes" >> ~/artem_telesh.txt
+
+                    kops validate cluster --name ${ConfigStorageName} --wait 15m
+
+                    local_name=flask-prediction
+                    docker_user=decisa
+                    dockerpath=$docker_user/$local_name
+
+                    kubectl create deployment $local_name --image=$dockerpath:latest
+
+                    kubectl expose deployment $local_name --type=LoadBalancer --port=$open_port --target-port=80
+                    kubectl get services
+
+
+                  - AZs:
+                        Fn::ImportValue:
+                            !Sub ${EnvironmentName}-AZs
+                    VPC:
+                        Fn::ImportValue:
+                            !Sub ${EnvironmentName}-VpcId
+                    SNets:
+                        Fn::ImportValue:
+                            !Sub ${EnvironmentName}-PubSNets
 
