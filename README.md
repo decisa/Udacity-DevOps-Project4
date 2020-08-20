@@ -31,6 +31,16 @@ I containerized a pre-trained `sklearn` model that has been trained to predict h
 - in a separate terminal window run `./make_prediction_minikube.sh PORT_NUMBER`, where PORT_NUMBER is port number from previous step.
 - enjoy the results.
 
+### deploy to AWS
+- make sure that `awscli` is installed and authenticated
+- run `./aws/create_network.sh` to create network infrastructure using cloud formation
+- once network cloudformation script is COMPLETE, run `./aws/create_servers.sh` to deploy app to AWS
+- you may need to create your key pair for ssh access to the Host EC2 instance
+- it takes approximately 10-15 minutes to deploy the app to AWS 
+- once Host EC2 instance is running, you can SSH into instance using it's public IP (username: ubuntu)
+- once logged in, run `make dnsname` to get the URL address for App Load Balancer to check the front end version (it takes some time to pass health checks for attached instances)
+- run `make destroy` to delete the Kubernetes Cluster prior to deleting the Cloud Formation stack.
+- enjoy !
 
 
 ## Files  in the prject

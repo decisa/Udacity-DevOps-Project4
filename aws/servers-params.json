@@ -1,0 +1,14 @@
+[
+    {
+        "ParameterKey": "EnvironmentName",
+        "ParameterValue": "UdacityProject4-k8s"
+    },
+    {
+        "ParameterKey": "HostInstanceType",
+        "ParameterValue": "t2.micro"
+    },
+    {
+        "ParameterKey": "HostKeyName",
+        "ParameterValue": "project4-host-key"
+    }
+]
